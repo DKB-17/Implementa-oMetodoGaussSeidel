@@ -5,7 +5,7 @@
 
 using namespace std;
 
-float norma(float v[], float x[], int tam){
+float parada(float v[], float x[], int tam){
 
     float maxnum = 0;
     float maxden = 0;
@@ -22,33 +22,31 @@ float norma(float v[], float x[], int tam){
     return maxnum/maxden;
 }
 
-float* seidel (float A[][ordemMax], float b[], float epsilon, int interMax, int tam){
+void gaussSeidel (float A[][ordemMax], float b[], float e, int interMax, int tam){
 
-    interMax = 50;
     float x[tam];
     float v[tam];
 
     for(int i=0;i < tam;i++){
-        for(int j=0;j < tam;j++){
-            if (i != j){
-                    A[i][j] = A[i][j]/A[i][i];
-            }
-        }
-        b[i] = b[i]/A[i][i];
+        x[i] = b[i]/A[i][i];
+        v[i] = 0;
     }
     for(int k=1;k<interMax;k++){
         for(int i = 0; i<tam; i++){
             int S = 0;
             for(int j=0; j<tam; j++){
                 if(i != j){
-                    S = S + A[i][j] * x[j];
+                    S -= A[i][j] * x[j];
                 }
             }
-            x[i] = b[i] - S;
+            x[i] = (float) ((b[i] - S) / A[i][i]);
         }
-        float d = norma(x, v, tam);
-        if (d <= epsilon){
-            return x;
+        float d = parada(x, v, tam);
+        if (d <= e){
+            for(int i=0;i<tam;i++){
+                cout << x[i] << "|";
+            }
+            return;
         }
 
         for(int i=0;i<tam;i++){
@@ -97,15 +95,42 @@ void imprimirSistema(float A[][ordemMax], float b[], int ordem){
 }
 
 void lerErro(float *e){
-    cout << "\nDigite o erro relativo: ";
+    cout << "\n\nDigite o erro relativo: ";
     cin >> *e;
 }
 
+bool converge(float A[][ordemMax], int tam){
+
+    double b[tam];
+    for(int i=0; i<tam; i++){
+        b[i] = 1;
+    }
+    float maxnum = 0;
+    for(int i=0; i < tam;i++){
+        float den = A[i][i];
+        float num = 0;
+        for(int j=0;j < tam;j++){
+            if(i != j){
+                num += (A[i][j] * b[j]);
+            }
+        }
+        b[i] = (double) num/den;
+        if(maxnum < abs(b[i])){
+            maxnum = abs(b[i]);
+        }
+    }
+    if(maxnum < 1){
+        return true;
+    }else{
+        return false;
+    }
+}
 
 int main(){
 
     int tam;
     int op;
+    int interMax = 50;
     float equacao[ordemMax][ordemMax];
     float igualdade[ordemMax];
     float erro = 0.00;
@@ -116,12 +141,23 @@ int main(){
         cin >> tam;
 
         lerMatriz(equacao, tam);
-        lerVetor(igualdade, tam);
 
-        imprimirSistema(equacao, igualdade, tam);
+        if(converge(equacao, tam)){
+            cout << "\nConverge";
 
-        lerErro(&erro);
-        cout << erro;
+            cout << "\n\tResultados: ";
+            lerVetor(igualdade, tam);
+
+            imprimirSistema(equacao, igualdade, tam);
+
+            lerErro(&erro);
+
+            gaussSeidel(equacao, igualdade, erro, interMax ,tam);
+
+        }else{
+            cout << "Nao converge";
+        }
+
 
 
 
