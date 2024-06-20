@@ -5,7 +5,7 @@
 
 using namespace std;
 
-float parada(float v[], float x[], int tam){
+double parada(float v[], float x[], int tam){
 
     float maxnum = 0;
     float maxden = 0;
@@ -19,11 +19,12 @@ float parada(float v[], float x[], int tam){
             maxden = den;
         }
     }
-    return maxnum/maxden;
+    return (double)maxnum/maxden;
 }
 
-void gaussSeidel (float A[][ordemMax], float b[], float e, int interMax, int tam){
+void gaussSeidel (float A[][ordemMax], float b[], float e, int tam){
 
+    int interMax = 50;
     float x[tam];
     float v[tam];
 
@@ -32,17 +33,23 @@ void gaussSeidel (float A[][ordemMax], float b[], float e, int interMax, int tam
         v[i] = 0;
     }
     for(int k=1;k<interMax;k++){
+            cout << "\n\t" << k << " Interacao: ";
+            for(int i=0;i<tam;i++){
+                cout << x[i] << "|";
+            }
         for(int i = 0; i<tam; i++){
-            int S = 0;
+            float S = 0;
             for(int j=0; j<tam; j++){
                 if(i != j){
-                    S -= A[i][j] * x[j];
+                    S += A[i][j] * x[j];
                 }
             }
+            //cout << "\n" << b[i] << "-" << S << "/" << A[i][i] << "=" << ((b[i] - S) / A[i][i]);
             x[i] = (float) ((b[i] - S) / A[i][i]);
         }
-        float d = parada(x, v, tam);
-        if (d <= e){
+        double d = parada(x, v, tam);
+        if (d < e){
+                cout << endl;
             for(int i=0;i<tam;i++){
                 cout << x[i] << "|";
             }
@@ -130,29 +137,28 @@ int main(){
 
     int tam;
     int op;
-    int interMax = 50;
-    float equacao[ordemMax][ordemMax];
-    float igualdade[ordemMax];
-    float erro = 0.00;
+    float equacao[ordemMax][ordemMax] = {{3,-1,1},{2,5,-1},{1,2,5}};
+    float igualdade[ordemMax] = {5,-8,-3};
+    float erro = 0.05;
 
     do{
         system("cls");
         cout << "\nQuantidade de elementos da equacao: ";
         cin >> tam;
 
-        lerMatriz(equacao, tam);
+        //lerMatriz(equacao, tam);
 
         if(converge(equacao, tam)){
             cout << "\nConverge";
 
             cout << "\n\tResultados: ";
-            lerVetor(igualdade, tam);
+            //lerVetor(igualdade, tam);
 
             imprimirSistema(equacao, igualdade, tam);
 
-            lerErro(&erro);
+            //lerErro(&erro);
 
-            gaussSeidel(equacao, igualdade, erro, interMax ,tam);
+            gaussSeidel(equacao, igualdade, erro ,tam);
 
         }else{
             cout << "Nao converge";
